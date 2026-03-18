@@ -7,6 +7,8 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.ItemGroups;
 
 public class TNTGun implements ModInitializer {
 	public static final String MOD_ID = "tntgun";
@@ -22,5 +24,9 @@ public class TNTGun implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "tnt_launcher"), TNT_LAUNCHER);
+
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(content -> {
+			content.add(TNT_LAUNCHER);
+		});
 	}
 }
