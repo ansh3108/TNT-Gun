@@ -12,33 +12,39 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.World.ExplosionSourceType;
+import net.minecraft.util.math.Box; 
+import net.minecraft.util.math.Vec3d;
 
 public class NitroCandyItem extends Item {
     public NitroCandyItem(Settings settings) { super(settings); }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (entity instanceof PlayerEntity player) {            
-            if (!player.isOnGround() && !player.hasStatusEffect(StatusEffects.SPEED) && player.velocityModified) {
-                player.fallDistance = 0; 
+        if (entity instanceof PlayerEntity player) {
+            if(player.hasStatusEffect(StatusEffects.RESISTANCE) && 
+            player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() >= 250) {
+            player.fallDistance = 0;
+        }
+
+        if(player.hasStatusEffect(StatusEffects.SPEED)) {
+            if(world.isClient && player.getVelocity().horizontalLengthSquared() > 0.01) {
+                world.addParticle(ParticleTypes.FLAME, player.getX(), player.getY(), player.getZ(), 0, 0.1, 0);
             }
 
-            if (player.hasStatusEffect(StatusEffects.SPEED)) {
-                if (world.isClient && player.getVelocity().horizontalLengthSquared() > 0.01) {
-                    world.addParticle(ParticleTypes.FLAME, player.getX(), player.getY(), player.getZ(), 0, 0.1, 0);
-                }
+            if(!world.isClient) {
+                Vec3d velocity = player.getVelocity();
+                if(velocity.horizontalLengthSquared() > 0.01) {
+                    Box sensorBox = player.getBoundingBox().stretch(velocity.x * 3, 0, velocity.z * 3).expand(0.1);
+                    
+                     boolean isHittingWall = world.getBlockCollisions(player, sensorBox).iterator().hasNext();
 
-                if (!world.isClient) {
-                    Vec3d lookDir = player.getRotationVec(1.0F).multiply(1.2);
-                    BlockPos frontPos = BlockPos.ofFloored(player.getX() + lookDir.x, player.getY() + 0.8, player.getZ() + lookDir.z);
-
-                    if (world.getBlockState(frontPos).isFullCube(world, frontPos) && player.getVelocity().horizontalLengthSquared() > 0.02) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 40, 5, false, false));
-                        world.createExplosion(null, player.getX(), player.getY(), player.getZ(), 2.0f, false, ExplosionSourceType.NONE);
-                        player.addVelocity(0, 1.5, 0);
+                    if(isHittingWall) {
+                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 100, 254, false, false, true));
+                        world.createExplosion(null, player.getX(), player.getY(), player.getZ(), 2.0f, false, World.ExplosionSourceType.NONE);
+                        player.addVelocity(0, 1.6, 0);
                         player.velocityModified = true;
-                        if (player instanceof ServerPlayerEntity) {
-                            player.velocityDirty = true;
+                        if (player instanceof ServerPlayerEntity serverPlayer) {
+                            serverPlayer.velocityDirty = true;
                         }
                         player.removeStatusEffect(StatusEffects.SPEED);
                         world.playSound(null, player.getX(), player.getY(), player.getZ(), 
@@ -49,4 +55,5 @@ public class NitroCandyItem extends Item {
             }
         }
     }
-}
+}}
+
