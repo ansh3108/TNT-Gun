@@ -33,4 +33,4 @@ public class TNTLauncherItem extends Item {
 		return TypedActionResult.success(itemStack, world.isClient());
 	}
 }
-
+ 

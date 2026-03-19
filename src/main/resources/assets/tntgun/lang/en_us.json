@@ -1,4 +1,6 @@
 {
     "item.tntgun.tnt_launcher": "TNT Launcher",
-    "entity.tntgun.custom_tnt": "Launched TNT"
+    "entity.tntgun.custom_tnt": "Launched TNT",
+    "item.tntgun.nitro_candy": "Nitro Candy",
+    "item.tntgun.gravity_anchor": "Gravity Anchor"
 }
